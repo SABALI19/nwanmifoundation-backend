@@ -7,6 +7,7 @@ const createToken = (userId) => {
     throw new Error("JWT_SECRET is not defined in .env");
   }
 
+  // Keep the token payload small: the database stays the source of truth for user details.
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN ,
   });
@@ -15,6 +16,7 @@ const createToken = (userId) => {
 const sendAuthResponse = (res, statusCode, message, user) => {
   const token = createToken(user._id);
 
+  // Return only profile fields the frontend needs; never echo password hashes back to the browser.
   return res.status(statusCode).json({
     message,
     token,
@@ -42,6 +44,7 @@ export const signup = async (req, res) => {
       return res.status(409).json({ message: "Email is already registered" });
     }
 
+    // Cost factor 12 is a practical default for signup/login security without making local dev painful.
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = await User.create({
       fullName: displayName,
@@ -73,6 +76,7 @@ export const login = async (req, res) => {
       });
     }
 
+    // The User model hides passwords by default, so login opts in only for this comparison.
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });

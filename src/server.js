@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import { connectDB } from "./dbConnections/dbConnection.js";
 import authRoutes from "./routes/authRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Foundation API' });
 });
 app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
 
 const startServer = async () => {
   try {
