@@ -1,0 +1,43 @@
+import dotenv from "dotenv";
+import express from "express";
+import { connectDB } from "./dbConnections/dbConnection.js";
+import authRoutes from "./routes/authRoutes.js";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.json());
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL || "http://localhost:5173");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  return next();
+});
+
+// Routes
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to Foundation API' });
+});
+app.use("/api/auth", authRoutes);
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server is listening on PORT ${PORT}`);
+    });
+  } catch (error) {
+    console.error(`Server could not start: ${error.message}`);
+    process.exit(1); // Exit if DB connection fails
+  }
+};
+
+startServer();
