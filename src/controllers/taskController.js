@@ -37,6 +37,10 @@ export const createTask = async (req, res) => {
       return res.status(400).json({ message: "Task title is required" });
     }
 
+    if (!due) {
+      return res.status(400).json({ message: "Choose due date and due time before creating a task" });
+    }
+
     const task = await Task.create({
       title,
       tag,
